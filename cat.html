@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat Animation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      font-family: Arial, sans-serif;
+    }
+
+    .message {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: Arial, sans-serif;
+      font-size: 48px;
+      color: white;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 1s ease;
+      letter-spacing: 2px;
+      /* responsive font size: base 48px, shrinks on small screens */
+      font-size: clamp(32px, 8vw, 48px);
+    }
+
+    .message.visible {
+      opacity: 1;
+    }
+
+    .cat-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      /* Начальный масштаб 0.8 для эффектаAppear */
+      transform: scale(0.8);
+      /* Плавный переход opacity и scale */
+      transition: opacity 2s ease-in-out, transform 2s ease-in-out;
+    }
+
+    /* Класс active - котик полный размер и виден */
+    .cat-img.active {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* Класс shrink - для первого-четвертого котиков при исчезновении */
+    .cat-img.shrink {
+      transform: scale(0) rotate(-360deg);
+      opacity: 0;
+    }
+
+    
+  </style>
+</head>
+<body>
+  <div class="message" id="message1">привет</div>
+  <div class="message" id="message2">я очень люблю твоих котов</div>
+  <div class="message" id="message3">они очень касивые и куртые</div>
+  <div class="message" id="message4">люблю них</div>
+
+  <div class="cat-img" id="catContainer"></div>
+
+  <script>
+    // Cat images array
+    const catImages = [
+      'cat.jpg',
+      'cat2.jpg',
+      'cat3.jpg',
+      'cat4.jpg',
+      'cat5.jpg'
+    ];
+
+    // Elements
+    const message1 = document.getElementById('message1');
+    const message2 = document.getElementById('message2');
+    const catContainer = document.getElementById('catContainer');
+
+    // Show first message after 100ms
+    setTimeout(() => {
+      message1.classList.add('visible');
+    }, 100);
+
+    // Hide first message after 2.5 seconds, show second message after 1 second delay
+    setTimeout(() => {
+      message1.classList.remove('visible');
+      // Wait 1 second before showing second message
+      setTimeout(() => {
+        message2.classList.add('visible');
+      }, 1000);
+    }, 2500);
+
+    // Hide second message after 2.5 seconds, then start cat cycle after 1 second delay
+    setTimeout(() => {
+      message2.classList.remove('visible');
+      // Wait 1 second before starting cat cycle
+      setTimeout(() => {
+        let index = 0;
+        
+        function showNextCat() {
+          // Set the background image
+          catContainer.style.backgroundImage = `url('${catImages[index]}')`;
+          
+          // Force reflow for animation to work
+          catContainer.offsetHeight;
+          
+          // Add active class for smooth scale + fade in
+          catContainer.classList.add('active');
+          
+          // Wait 2 seconds, then handle removal
+          setTimeout(() => {
+            // For all cats except the last one, add shrink class
+            // For the last cat, just remove active class (normal fade out)
+            if (index < catImages.length - 1) {
+              // Not the last cat: add shrink class for shrinking effect
+              catContainer.classList.remove('active');
+              catContainer.classList.add('shrink');
+              // After shrink animation completes, remove shrink class and show next
+              setTimeout(() => {
+                catContainer.classList.remove('shrink');
+                index++;
+                if (index < catImages.length) {
+                  showNextCat();
+                }
+              }, 2000); // match the shrink transition duration
+            } else {
+              // Last cat: just remove active class for normal fade out
+              catContainer.classList.remove('active');
+              // After fade out completes, show first new text
+              setTimeout(() => {
+                message3.classList.add('visible');
+                // Wait 2.5 seconds, then show second text and hide first
+                setTimeout(() => {
+                  message3.classList.remove('visible');
+                  message4.classList.add('visible');
+                  // Wait 2.5 seconds, then hide second text
+                  setTimeout(() => {
+                    message4.classList.remove('visible');
+                  }, 2500);
+                }, 1000);
+              }, 1000); // match the fade out transition duration
+            }
+          }, 2000); // Wait 2 seconds before starting fade out/shrink
+        }
+        
+        // Start the cycle
+        showNextCat();
+      }, 1000);
+    }, 5000);
+  </script>
+</body>
+</html>
